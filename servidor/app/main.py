@@ -7,7 +7,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import analytics, ingestao, traces
+from app.api import alertas, analytics, datasets, drift, ingestao, traces
 from app.bd.sessao import Base, engine
 from app.configuracao import obter_configuracao
 
@@ -36,6 +36,9 @@ app.add_middleware(
 app.include_router(ingestao.roteador)
 app.include_router(traces.roteador)
 app.include_router(analytics.roteador)
+app.include_router(drift.roteador)
+app.include_router(datasets.roteador)
+app.include_router(alertas.roteador)
 
 
 @app.on_event("startup")

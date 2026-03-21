@@ -9,7 +9,12 @@ celery_app = Celery(
     "sentinela",
     broker=config.celery_broker_url,
     backend=config.celery_result_backend,
-    include=["app.workers.worker_avaliacao", "app.workers.worker_analytics"],
+    include=[
+        "app.workers.worker_avaliacao",
+        "app.workers.worker_analytics",
+        "app.workers.worker_alerta",
+        "app.workers.worker_benchmark",
+    ],
 )
 
 celery_app.conf.update(
@@ -22,10 +27,15 @@ celery_app.conf.update(
     task_acks_late=True,
     worker_prefetch_multiplier=1,
     beat_schedule={
-        # Roda aggregações a cada hora
+        # Roda agregações a cada hora
         "analytics-horario": {
             "task": "app.workers.worker_analytics.calcular_agregacoes",
             "schedule": 3600.0,
+        },
+        # Checa regras de alerta a cada 5 minutos
+        "alertas-periodico": {
+            "task": "app.workers.worker_alerta.verificar_alertas",
+            "schedule": 300.0,
         },
     },
 )

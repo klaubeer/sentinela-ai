@@ -18,8 +18,14 @@
 | Workers Celery | ✅ Concluído |
 | 7 Avaliadores | ✅ Concluído |
 | API Analytics | ✅ Concluído |
-| Dashboard (3 páginas) | ✅ Concluído |
-| Documentação | ⏳ Pendente |
+| Dashboard (6 páginas) | ✅ Concluído |
+| Guardrails | ✅ Concluído |
+| Drift Detection | ✅ Concluído |
+| Dataset Management | ✅ Concluído |
+| Alertas (Slack/Discord) | ✅ Concluído |
+| Exemplos de integração | ✅ Concluído |
+| Script de seed | ✅ Concluído |
+| Documentação | ✅ Concluído |
 
 ---
 
@@ -120,41 +126,43 @@
 
 | Feature | Status | Notas |
 |---------|--------|-------|
-| Modo síncrono (bloqueia resposta) | ⏳ Pendente | `@observe(guardrails=["sem_pii"])` |
-| Modo assíncrono (só loga) | ⏳ Pendente | `@observe(guardrails_modo="async")` |
-| Guardrail: sem PII | ⏳ Pendente | |
-| Guardrail: sem toxicidade | ⏳ Pendente | |
-| Guardrail: on-topic | ⏳ Pendente | |
+| Modo assíncrono (avalia e loga, não bloqueia) | ✅ Concluído | `app/nucleo/guardrails.py` |
+| Guardrail: sem PII | ✅ Concluído | Reutiliza `AvaliadorDeteccaoPII` |
+| Guardrail: sem toxicidade | ✅ Concluído | Reutiliza `AvaliadorToxicidade` |
+| Violações persistidas como `ResultadoAvaliacao` | ✅ Concluído | Prefixo `guardrail:` no avaliador |
+| Ativado via metadata do trace | ✅ Concluído | `metadata={"guardrails": ["sem_pii"]}` |
 
 ### Drift Detection
 
 | Feature | Status | Notas |
 |---------|--------|-------|
-| Comparação de janelas de tempo | ⏳ Pendente | Semana atual vs. semana anterior |
-| Identificação de possíveis causas | ⏳ Pendente | |
-| API: `GET /drift` | ⏳ Pendente | |
+| Comparação de janelas de tempo consecutivas | ✅ Concluído | `app/nucleo/detector_drift.py` |
+| Threshold configurável (padrão: queda > 10%) | ✅ Concluído | `THRESHOLD_DRIFT = 0.10` |
+| `GET /drift/{projeto}` | ✅ Concluído | `app/api/drift.py` — janela em horas |
 
 ### Datasets e Regression Testing
 
 | Feature | Status | Notas |
 |---------|--------|-------|
-| ORM: Dataset, ItemDataset | ⏳ Pendente | |
-| `CRUD /datasets` | ⏳ Pendente | |
-| Criar dataset a partir de traces reais | ⏳ Pendente | Filtra por score alto |
-| Rodar benchmark em dataset | ⏳ Pendente | `sentinela.run_benchmark(...)` |
-| Dataset: vertice_ai_golden.json | ⏳ Pendente | 50 perguntas + respostas esperadas |
-| Dataset: postador_golden.json | ⏳ Pendente | 30 prompts + outputs esperados |
+| ORM: Dataset, ItemDataset | ✅ Concluído | `app/modelos/dataset.py` |
+| `CRUD /datasets` | ✅ Concluído | `app/api/datasets.py` |
+| `POST /datasets/{id}/benchmark` | ✅ Concluído | Enfileira no Celery, retorna task_id |
+| Worker de benchmark | ✅ Concluído | `app/workers/worker_benchmark.py` |
+| Dataset: vertice_ai_golden.json | ⏳ Pendente | Fase 4 — seed de dados |
+| Dataset: postador_golden.json | ⏳ Pendente | Fase 4 — seed de dados |
 
 ### Alertas
 
 | Feature | Status | Notas |
 |---------|--------|-------|
-| ORM: Alerta, RegraAlerta | ⏳ Pendente | |
-| Worker de checagem de alertas | ⏳ Pendente | |
-| Webhook Slack | ⏳ Pendente | |
-| Webhook Discord | ⏳ Pendente | |
-| `CRUD /alertas` — regras de alerta | ⏳ Pendente | |
-| Dashboard: Página de Alertas | ⏳ Pendente | |
+| ORM: Alerta, RegraAlerta | ✅ Concluído | `app/modelos/alerta.py` |
+| Worker de checagem a cada 5 min (Celery Beat) | ✅ Concluído | `app/workers/worker_alerta.py` |
+| Anti-spam: não repete alerta na mesma janela | ✅ Concluído | Checa histórico antes de disparar |
+| Webhook Slack (com blocks formatados) | ✅ Concluído | `app/nucleo/notificador.py` |
+| Webhook Discord (com embeds) | ✅ Concluído | |
+| `CRUD /alertas/regras` | ✅ Concluído | `app/api/alertas.py` |
+| `GET /alertas/historico` | ✅ Concluído | |
+| Dashboard: Página de Alertas | ⏳ Pendente | Fase 4 |
 
 ---
 
@@ -166,36 +174,36 @@
 
 | Feature | Status | Notas |
 |---------|--------|-------|
-| Página: Comparações A/B | ⏳ Pendente | Prompt v1 vs v2, Modelo A vs B |
-| Página: Datasets | ⏳ Pendente | Gerenciar datasets de regressão |
+| Página: Comparações A/B | ✅ Concluído | `dashboard/paginas/comparacoes.py` |
+| Página: Datasets | ✅ Concluído | `dashboard/paginas/datasets.py` |
+| Página: Alertas | ✅ Concluído | `dashboard/paginas/alertas.py` — 3 abas |
 
 ### Exemplos e Integrações
 
 | Feature | Status | Notas |
 |---------|--------|-------|
-| Exemplo: Vértice AI (antes/depois) | ⏳ Pendente | |
-| Exemplo: Postador (antes/depois) | ⏳ Pendente | |
-| Exemplo: LangChain genérico | ⏳ Pendente | |
+| Exemplo: Vértice AI (antes/depois) | ✅ Concluído | `exemplos/vertice_ai/` |
+| Exemplo: Postador (antes/depois) | ✅ Concluído | `exemplos/postador/` |
+| Exemplo: LangChain genérico | ✅ Concluído | `exemplos/langchain_generico/` |
 
 ### DevX e Demo
 
 | Feature | Status | Notas |
 |---------|--------|-------|
-| Script de seed de dados fake | ⏳ Pendente | Demo funcional sem dados reais |
-| Script de benchmark | ⏳ Pendente | |
-| Makefile (`make dev`, `make test`, `make seed`) | ⏳ Pendente | |
-| GIF/vídeo demo no README | ⏳ Pendente | |
-| `.env.example` | ⏳ Pendente | |
+| Script de seed de dados fake | ✅ Concluído | `scripts/popular_dados.py` — 7 dias de histórico |
+| Makefile (`make dev`, `make seed`, `make teste`) | ✅ Concluído | |
+| `.env.example` | ✅ Concluído | |
+| GIF/vídeo demo no README | ⏳ Pendente | Gravar após subir o projeto |
 
 ### Documentação
 
 | Feature | Status | Notas |
 |---------|--------|-------|
-| `docs/arquitetura.md` | ⏳ Pendente | |
-| `docs/referencia_sdk.md` | ⏳ Pendente | |
-| `docs/avaliadores.md` | ⏳ Pendente | |
-| `docs/avaliadores_customizados.md` | ⏳ Pendente | |
-| `docs/deploy.md` | ⏳ Pendente | |
+| `docs/arquitetura.md` | ✅ Concluído | Diagrama de fluxo + decisões de design |
+| `docs/referencia_sdk.md` | ✅ Concluído | API completa do SDK |
+| `docs/avaliadores.md` | ✅ Concluído | Todos os 7 avaliadores documentados |
+| `docs/avaliadores_customizados.md` | ✅ Concluído | 2 formas de criar avaliadores |
+| `docs/deploy.md` | ✅ Concluído | Dev, produção e escalonamento |
 
 ---
 

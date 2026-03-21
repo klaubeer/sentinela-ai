@@ -12,10 +12,7 @@ logger = logging.getLogger("sentinela.workers.avaliacao")
 
 @celery_app.task(name="app.workers.worker_avaliacao.avaliar_trace", bind=True, max_retries=3)
 def avaliar_trace(self, trace_dados: dict) -> dict:
-    """Tarefa Celery que roda todos os avaliadores para um trace.
-
-    Recebe o trace serializado como dict e persiste os ResultadoAvaliacao no banco.
-    """
+    """Tarefa Celery que roda avaliadores e guardrails para um trace."""
     try:
         return asyncio.run(_avaliar_trace_async(trace_dados))
     except Exception as exc:
@@ -24,11 +21,8 @@ def avaliar_trace(self, trace_dados: dict) -> dict:
 
 
 async def _avaliar_trace_async(trace_dados: dict) -> dict:
-    from sqlalchemy.ext.asyncio import AsyncSession
-
     from app.avaliadores.base import AvaliadorBase
     from app.avaliadores.coerencia import AvaliadorCoerencia
-    from app.avaliadores.customizado import AvaliadorCustomizado
     from app.avaliadores.deteccao_pii import AvaliadorDeteccaoPII
     from app.avaliadores.eficiencia_custo import AvaliadorEficienciaCusto
     from app.avaliadores.faithfulness import AvaliadorFaithfulness
@@ -37,6 +31,7 @@ async def _avaliar_trace_async(trace_dados: dict) -> dict:
     from app.bd.sessao import FabricaSessao
     from app.esquemas.trace import TraceEntrada
     from app.modelos.trace import ResultadoAvaliacao
+    from app.nucleo.guardrails import MotorGuardrails
 
     trace = TraceEntrada(**trace_dados)
 
@@ -50,7 +45,10 @@ async def _avaliar_trace_async(trace_dados: dict) -> dict:
     ]
 
     resultados = []
+    violacoes_guardrail: list[str] = []
+
     async with FabricaSessao() as sessao:
+        # Roda avaliadores
         for avaliador in avaliadores:
             try:
                 resultado = await avaliador.avaliar(trace)
@@ -78,6 +76,30 @@ async def _avaliar_trace_async(trace_dados: dict) -> dict:
             except Exception as e:
                 logger.error("Avaliador %s falhou para trace %s: %s", avaliador.nome, trace.id, e)
 
+        # Roda guardrails se configurados nos metadados do trace
+        guardrails_config = trace.metadata.get("guardrails", [])
+        if guardrails_config:
+            motor = MotorGuardrails(guardrails=guardrails_config)
+            resultado_guardrail = await motor.verificar(trace)
+            violacoes_guardrail = resultado_guardrail.violacoes
+
+            if not resultado_guardrail.passou:
+                # Persiste cada violação como um resultado de avaliação especial
+                for violacao in resultado_guardrail.violacoes:
+                    orm_guardrail = ResultadoAvaliacao(
+                        id=f"guardrail_{violacao}_{trace.id}",
+                        trace_id=trace.id,
+                        avaliador=f"guardrail:{violacao}",
+                        score=0.0,
+                        aprovado=False,
+                        raciocinio=resultado_guardrail.detalhes.get(violacao),
+                    )
+                    sessao.add(orm_guardrail)
+
         await sessao.commit()
 
-    return {"trace_id": trace.id, "resultados": resultados}
+    return {
+        "trace_id": trace.id,
+        "resultados": resultados,
+        "violacoes_guardrail": violacoes_guardrail,
+    }

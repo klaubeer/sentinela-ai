@@ -93,7 +93,7 @@ services:
     environment:
       SERVIDOR_URL: http://servidor:8000
     ports:
-      - "8501:8501"
+      - "8502:8501"
     depends_on:
       - servidor
     volumes:

@@ -17,7 +17,7 @@
 
 <p align="center">
   <em>Você sabe quantas respostas do seu sistema de IA estão alucinando agora mesmo?<br/>
-  O Sentinela sabe — e te avisa antes que o usuário perceba.</em>
+  O Sentinela sabe e te avisa antes que o usuário perceba.</em>
 </p>
 
 ---

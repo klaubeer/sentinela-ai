@@ -24,7 +24,7 @@
 
 ## O Problema
 
-Equipes gastam semanas construindo RAG e agentes LLM, mas zero tempo monitorando se as respostas são boas. Quando descobrem que o modelo está alucinando ou gerando conteúdo tóxico, já perderam a confiança dos usuários — e às vezes causaram dano real.
+Equipes gastam semanas construindo RAG e agentes LLM, mas zero tempo monitorando se as respostas são boas. Quando descobrem que o modelo está alucinando ou gerando conteúdo tóxico, já perderam a confiança dos usuários e às vezes causaram dano real.
 
 **O Sentinela resolve isso.**
 

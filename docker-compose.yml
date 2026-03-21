@@ -1,0 +1,69 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sentinela-postgres
+    environment:
+      POSTGRES_USER: sentinela
+      POSTGRES_PASSWORD: sentinela
+      POSTGRES_DB: sentinela
+    ports:
+      - "5432:5432"
+    volumes:
+      - dados_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentinela"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: sentinela-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  servidor:
+    build:
+      context: ./servidor
+      dockerfile: Dockerfile
+    container_name: sentinela-servidor
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://sentinela:sentinela@postgres:5432/sentinela
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./servidor:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    container_name: sentinela-dashboard
+    env_file: .env
+    environment:
+      SERVIDOR_URL: http://servidor:8000
+    ports:
+      - "8501:8501"
+    depends_on:
+      - servidor
+    volumes:
+      - ./dashboard:/app
+    command: streamlit run app.py --server.port 8501 --server.address 0.0.0.0
+
+volumes:
+  dados_postgres:

@@ -82,7 +82,7 @@ def renderizar() -> None:
                 if st.button("▶ Rodar Benchmark", key=f"bench_{ds['id']}"):
                     resultado = _rodar_benchmark(ds["id"], avaliadores_sel)
                     if resultado:
-                        st.success(f"Benchmark enfileirado! Task ID: `{resultado['task_id']}`")
+                        st.success("Benchmark iniciado! Os resultados aparecerão nos logs do servidor.")
 
                 if st.button("🗑 Deletar", key=f"del_{ds['id']}", type="secondary"):
                     if _deletar_dataset(ds["id"]):

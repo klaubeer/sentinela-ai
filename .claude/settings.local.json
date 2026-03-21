@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git filter-branch:*)",
+      "Bash(git push:*)",
+      "Bash(docker-compose -f C:/Users/cheff/sentinela-ai/docker-compose.yml logs servidor)"
+    ]
+  }
+}

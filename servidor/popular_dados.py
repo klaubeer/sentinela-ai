@@ -204,11 +204,8 @@ async def main() -> None:
             dia_str = (datetime.utcnow() - timedelta(days=dias_atras)).strftime("%d/%m")
             print(f"📅 {dia_str}: enviando {len(traces)} traces...", end=" ")
 
-            ok = 0
-            for trace in traces:
-                if await enviar_trace(cliente, trace):
-                    ok += 1
-                await asyncio.sleep(0.1)  # evita sobrecarregar o servidor
+            resultados = await asyncio.gather(*[enviar_trace(cliente, t) for t in traces])
+            ok = sum(resultados)
             total += ok
             print(f"✓ {ok}/{len(traces)}")
 

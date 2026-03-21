@@ -5,7 +5,7 @@ from __future__ import annotations
 import uuid
 from typing import Annotated, Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -141,6 +141,7 @@ async def rodar_benchmark(
     dataset_id: str,
     entrada: BenchmarkEntrada,
     sessao: Annotated[AsyncSession, Depends(obter_sessao)],
+    background_tasks: BackgroundTasks,
 ) -> dict:
     """Roda avaliadores em todos os itens do dataset e retorna scores agregados."""
     resultado_ds = await sessao.execute(
@@ -153,24 +154,27 @@ async def rodar_benchmark(
     if not dataset.itens:
         raise HTTPException(status_code=400, detail="Dataset não tem itens")
 
-    from app.workers.worker_benchmark import rodar_benchmark_task
-    task = rodar_benchmark_task.delay(
+    itens = [
+        {
+            "id": i.id,
+            "input": i.input,
+            "output_esperado": i.output_esperado,
+            "contexto": i.contexto,
+        }
+        for i in dataset.itens
+    ]
+    rotulo = entrada.rotulo or dataset.nome
+
+    from app.workers.worker_benchmark import _rodar_benchmark_async
+    background_tasks.add_task(
+        _rodar_benchmark_async,
         dataset_id=dataset_id,
-        itens=[
-            {
-                "id": i.id,
-                "input": i.input,
-                "output_esperado": i.output_esperado,
-                "contexto": i.contexto,
-            }
-            for i in dataset.itens
-        ],
-        avaliadores=entrada.avaliadores,
-        rotulo=entrada.rotulo or dataset.nome,
+        itens=itens,
+        nomes_avaliadores=entrada.avaliadores,
+        rotulo=rotulo,
     )
 
     return {
-        "task_id": task.id,
         "dataset_id": dataset_id,
         "total_itens": len(dataset.itens),
         "avaliadores": entrada.avaliadores,

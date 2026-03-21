@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import uuid
 
 from app.workers.celery_app import celery_app
 
@@ -53,7 +54,7 @@ async def _avaliar_trace_async(trace_dados: dict) -> dict:
             try:
                 resultado = await avaliador.avaliar(trace)
                 orm = ResultadoAvaliacao(
-                    id=f"{avaliador.nome}_{trace.id}",
+                    id=str(uuid.uuid4()),
                     trace_id=trace.id,
                     avaliador=resultado.avaliador,
                     score=resultado.score,
@@ -87,7 +88,7 @@ async def _avaliar_trace_async(trace_dados: dict) -> dict:
                 # Persiste cada violação como um resultado de avaliação especial
                 for violacao in resultado_guardrail.violacoes:
                     orm_guardrail = ResultadoAvaliacao(
-                        id=f"guardrail_{violacao}_{trace.id}",
+                        id=str(uuid.uuid4()),
                         trace_id=trace.id,
                         avaliador=f"guardrail:{violacao}",
                         score=0.0,

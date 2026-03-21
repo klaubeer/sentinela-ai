@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.bd.sessao import obter_sessao
@@ -21,8 +21,9 @@ roteador = APIRouter(prefix="/traces", tags=["Ingestão"])
 async def receber_trace(
     trace: TraceEntrada,
     sessao: Annotated[AsyncSession, Depends(obter_sessao)],
+    background_tasks: BackgroundTasks,
 ) -> dict:
-    """Recebe um trace do SDK, persiste no banco e enfileira avaliação via Celery."""
+    """Recebe um trace do SDK, persiste no banco e dispara avaliação em background."""
     orm = TraceORM(
         id=trace.id,
         projeto=trace.projeto,
@@ -45,8 +46,8 @@ async def receber_trace(
 
     logger.info("Trace recebido: %s (projeto=%s, nome=%s)", trace.id, trace.projeto, trace.nome)
 
-    # Enfileira avaliação no Celery (não bloqueia a resposta)
-    from app.workers.worker_avaliacao import avaliar_trace
-    avaliar_trace.delay(trace.model_dump(mode="json"))
+    # Avalia em background sem depender do Celery broker
+    from app.workers.worker_avaliacao import _avaliar_trace_async
+    background_tasks.add_task(_avaliar_trace_async, trace.model_dump(mode="json"))
 
     return {"id": trace.id, "status": "recebido"}

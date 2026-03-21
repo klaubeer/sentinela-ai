@@ -10,10 +10,16 @@ st.set_page_config(
 )
 
 # Navegação via sidebar
+_PAGINAS = {
+    "Visão Geral": "📊 Visão Geral",
+    "Traces": "🔍 Traces",
+    "Avaliações": "📈 Avaliações",
+}
+
 pagina = st.sidebar.selectbox(
     "Navegação",
-    options=["Visão Geral", "Traces"],
-    format_func=lambda p: {"Visão Geral": "📊 Visão Geral", "Traces": "🔍 Traces"}[p],
+    options=list(_PAGINAS.keys()),
+    format_func=lambda p: _PAGINAS[p],
 )
 
 if pagina == "Visão Geral":
@@ -21,4 +27,7 @@ if pagina == "Visão Geral":
     renderizar()
 elif pagina == "Traces":
     from paginas.traces import renderizar
+    renderizar()
+elif pagina == "Avaliações":
+    from paginas.avaliacoes import renderizar
     renderizar()

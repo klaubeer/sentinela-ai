@@ -291,6 +291,34 @@ Veja o acompanhamento detalhado de features e progresso em [STATUS.md](STATUS.md
 
 ---
 
+## Segurança e Privacidade
+
+O SDK captura **apenas o que está dentro da função decorada com `@observe()`**. Nada mais.
+
+**O que é coletado:**
+- Input e output da função instrumentada
+- Latência, tokens utilizados e custo estimado
+- Modelo utilizado e metadados que você mesmo adicionar
+
+**O que nunca é acessado:**
+- Variáveis de ambiente ou secrets da aplicação
+- Sistema de arquivos
+- Qualquer dado fora do escopo da função decorada
+- Outras funções, classes ou módulos não instrumentados
+
+**Você tem controle total:**
+
+```python
+@observe()
+def funcao_monitorada(pergunta: str) -> str: ...  # capturado
+
+def funcao_privada(dado_sensivel: str) -> str: ...  # invisível pro Sentinela
+```
+
+O servidor pode rodar **100% na sua própria infraestrutura** — nenhum dado precisa sair do seu ambiente. O Sentinela AI é open-source: qualquer pessoa pode auditar o código do SDK e verificar o que ele faz antes de instalar.
+
+---
+
 ## Licença
 
 MIT — use, modifique e distribua à vontade.

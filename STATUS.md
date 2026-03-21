@@ -15,7 +15,10 @@
 | Infraestrutura Docker | ✅ Concluído |
 | SDK Python | ✅ Concluído |
 | Backend (FastAPI) | ✅ Concluído |
-| Dashboard (Streamlit) | ✅ Concluído (básico) |
+| Workers Celery | ✅ Concluído |
+| 7 Avaliadores | ✅ Concluído |
+| API Analytics | ✅ Concluído |
+| Dashboard (3 páginas) | ✅ Concluído |
 | Documentação | ⏳ Pendente |
 
 ---
@@ -74,35 +77,38 @@
 
 | Feature | Status | Notas |
 |---------|--------|-------|
-| Setup Celery + Redis | ⏳ Pendente | |
-| Worker de avaliação (background) | ⏳ Pendente | Evals não bloqueiam a ingestão |
-| Worker de analytics (hourly) | ⏳ Pendente | Calcula médias e agregações |
+| Setup Celery + Redis | ✅ Concluído | `app/workers/celery_app.py` |
+| Worker de avaliação (background) | ✅ Concluído | `app/workers/worker_avaliacao.py` — retry automático |
+| Worker de analytics (hourly) | ✅ Concluído | `app/workers/worker_analytics.py` + Celery Beat |
 
 ### Avaliadores adicionais
 
 | Avaliador | Status | Notas |
 |-----------|--------|-------|
-| `Toxicidade` (LLM-as-Judge) | ⏳ Pendente | |
-| `Coerência` (LLM-as-Judge) | ⏳ Pendente | |
-| `Detecção de PII` (Regex + NER) | ⏳ Pendente | |
-| `Eficiência de Custo` (Métrica) | ⏳ Pendente | Tokens × custo por modelo |
-| `Customizado` (prompt definido pelo usuário) | ⏳ Pendente | |
+| `Toxicidade` (LLM-as-Judge) | ✅ Concluído | `app/avaliadores/toxicidade.py` |
+| `Coerência` (LLM-as-Judge) | ✅ Concluído | `app/avaliadores/coerencia.py` |
+| `Detecção de PII` (Regex) | ✅ Concluído | `app/avaliadores/deteccao_pii.py` — CPF, CNPJ, e-mail, tel, cartão |
+| `Eficiência de Custo` (Métrica) | ✅ Concluído | `app/avaliadores/eficiencia_custo.py` — tabela de preços por modelo |
+| `Customizado` (prompt definido pelo usuário) | ✅ Concluído | `app/avaliadores/customizado.py` |
 
 ### ORM e API
 
 | Feature | Status | Notas |
 |---------|--------|-------|
-| ORM: ResultadoAvaliacao, RodadaAvaliacao | ⏳ Pendente | |
-| `GET /avaliacoes` — resultados por trace | ⏳ Pendente | |
-| `GET /analytics` — trends e agregações | ⏳ Pendente | |
+| ORM: ResultadoAvaliacao | ✅ Concluído | Fase 1 |
+| `GET /avaliacoes` — resultados por trace | ✅ Concluído | Embutido no `GET /traces/{id}` |
+| `GET /analytics/scores` — trends e scores | ✅ Concluído | `app/api/analytics.py` |
+| `GET /analytics/volume` — volume por dia | ✅ Concluído | |
+| `GET /analytics/projetos` — resumo por projeto | ✅ Concluído | |
 
 ### Dashboard
 
 | Feature | Status | Notas |
 |---------|--------|-------|
-| Página: Avaliações com trends | ⏳ Pendente | Sparkline por avaliador ao longo do tempo |
-| Componente: Score card com tendência | ⏳ Pendente | |
-| Componente: Gráficos reutilizáveis | ⏳ Pendente | |
+| Página: Avaliações com trends | ✅ Concluído | `dashboard/paginas/avaliacoes.py` |
+| Componente: Score card com tendência | ✅ Concluído | Métricas com delta de aprovação |
+| Componente: Heatmap avaliador × dia | ✅ Concluído | Visualização rápida de degradação |
+| Componente: Gráficos reutilizáveis | ✅ Concluído | `dashboard/componentes/graficos.py` |
 
 ---
 

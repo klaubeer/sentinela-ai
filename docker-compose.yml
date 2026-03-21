@@ -49,6 +49,41 @@ services:
       - ./servidor:/app
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
+  worker:
+    build:
+      context: ./servidor
+      dockerfile: Dockerfile
+    container_name: sentinela-worker
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://sentinela:sentinela@postgres:5432/sentinela
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./servidor:/app
+    command: celery -A app.workers.celery_app worker --loglevel=info --concurrency=2
+
+  beat:
+    build:
+      context: ./servidor
+      dockerfile: Dockerfile
+    container_name: sentinela-beat
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://sentinela:sentinela@postgres:5432/sentinela
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+    depends_on:
+      - worker
+    volumes:
+      - ./servidor:/app
+    command: celery -A app.workers.celery_app beat --loglevel=info
+
   dashboard:
     build:
       context: ./dashboard

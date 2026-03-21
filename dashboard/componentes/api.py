@@ -49,6 +49,54 @@ def buscar_trace(trace_id: str) -> Optional[dict]:
         return None
 
 
+@st.cache_data(ttl=60)
+def buscar_scores_analytics(
+    projeto: Optional[str] = None,
+    dias: int = 7,
+) -> dict:
+    params: dict[str, Any] = {"dias": dias}
+    if projeto:
+        params["projeto"] = projeto
+    try:
+        with httpx.Client(base_url=SERVIDOR_URL, timeout=10) as client:
+            r = client.get("/analytics/scores", params=params)
+            r.raise_for_status()
+            return r.json()
+    except Exception as e:
+        st.error(f"Erro ao buscar analytics: {e}")
+        return {"resumo": [], "serie_temporal": []}
+
+
+@st.cache_data(ttl=60)
+def buscar_volume_analytics(
+    projeto: Optional[str] = None,
+    dias: int = 7,
+) -> dict:
+    params: dict[str, Any] = {"dias": dias}
+    if projeto:
+        params["projeto"] = projeto
+    try:
+        with httpx.Client(base_url=SERVIDOR_URL, timeout=10) as client:
+            r = client.get("/analytics/volume", params=params)
+            r.raise_for_status()
+            return r.json()
+    except Exception as e:
+        st.error(f"Erro ao buscar volume: {e}")
+        return {"serie": []}
+
+
+@st.cache_data(ttl=60)
+def buscar_projetos_analytics(dias: int = 7) -> dict:
+    try:
+        with httpx.Client(base_url=SERVIDOR_URL, timeout=10) as client:
+            r = client.get("/analytics/projetos", params={"dias": dias})
+            r.raise_for_status()
+            return r.json()
+    except Exception as e:
+        st.error(f"Erro ao buscar projetos: {e}")
+        return {"projetos": []}
+
+
 def verificar_conexao() -> bool:
     try:
         with httpx.Client(base_url=SERVIDOR_URL, timeout=3) as client:

@@ -23,6 +23,10 @@ class Configuracao(BaseSettings):
     openai_api_key: str = ""
     modelo_avaliacao: str = "gpt-4o-mini"
 
+    # Celery
+    celery_broker_url: str = "redis://localhost:6379/0"
+    celery_result_backend: str = "redis://localhost:6379/1"
+
     @property
     def em_producao(self) -> bool:
         return self.ambiente == "producao"

@@ -269,10 +269,17 @@ sentinela-ai/
 
 ---
 
-## Casos de Uso Reais
+## Projetos com Integração Ativa
 
-- **Vértice AI**: detectou que 23% das respostas tinham baixa faithfulness — passavam despercebidas sem monitoramento
-- **Postador**: identificou que trocar de GPT-4 para GPT-4o-mini reduziu custo em 60% sem perda mensurável de qualidade
+Projetos reais já monitorados pelo Sentinela AI em desenvolvimento:
+
+| Projeto | Descrição | Stack | Repositório |
+|---------|-----------|-------|-------------|
+| **Vértice AI** | Sistema multi-agente de atendimento ao cliente para marca de moda — RAG + roteamento por intenção | Claude + LangChain + Chroma | [github.com/klaubeer/vertice-ai](https://github.com/klaubeer/vertice-ai) |
+| **Postador** | Agente de geração e publicação de conteúdo para redes sociais | OpenAI + LangChain | [github.com/klaubeer/postador-ai-agent](https://github.com/klaubeer/postador-ai-agent) |
+| **Data Navigator** | Plataforma de catálogo de metadados com agente conversacional para descoberta de datasets | GPT-4o-mini + LangChain + pgvector | [github.com/klaubeer/ai-metadata-catalog](https://github.com/klaubeer/ai-metadata-catalog) |
+
+> Em todos os casos a integração foi feita em **menos de 20 linhas de código**, sem alterar o comportamento da aplicação.
 
 ---
 

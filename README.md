@@ -325,11 +325,14 @@ def funcao_privada(dado_sensivel: str) -> str: ...  # invisível pro Sentinela
 O servidor pode rodar **100% na sua própria infraestrutura** — nenhum dado precisa sair do seu ambiente. O Sentinela AI é open-source: qualquer pessoa pode auditar o código do SDK e verificar o que ele faz antes de instalar.
 
 
-Autor
-Klauber Fischer
+
 
 ---
 
 ## Licença
 
 MIT — use, modifique e distribua à vontade.
+
+##Autor
+
+Klauber Fischer

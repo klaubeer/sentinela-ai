@@ -1,4 +1,4 @@
-# 🛡️ Sentinela AI
+# 🛡️ Sentinela 
 
 <p align="center">
   <img src="https://img.shields.io/badge/python-3.10+-blue?logo=python&logoColor=white" alt="Python"/>

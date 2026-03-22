@@ -30,7 +30,7 @@ Equipes gastam semanas construindo RAG e agentes LLM, mas zero tempo monitorando
 
 ## O que é
 
-O Sentinela AI é uma plataforma open-source de **avaliação e observabilidade** para aplicações baseadas em LLMs. Ele monitora, avalia e protege sistemas de IA em produção — capturando cada interação, rodando evaluations automáticos e alertando quando algo sai do esperado.
+O Sentinela é uma plataforma open-source de **avaliação e observabilidade** para aplicações baseadas em LLMs. Ele monitora, avalia e protege sistemas de IA em produção — capturando cada interação, rodando evaluations automáticos e alertando quando algo sai do esperado.
 
 **Tagline:** *"Seu copiloto de qualidade para LLMs em produção"*
 

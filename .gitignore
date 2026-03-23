@@ -1,5 +1,5 @@
 # === Ambiente ===
-.env
+.env 
 *.env.local
 
 # === Python ===

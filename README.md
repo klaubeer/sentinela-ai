@@ -36,6 +36,14 @@ O Sentinela é uma plataforma open-source de **avaliação e observabilidade** p
 
 ---
 
+## Demonstração
+
+<p align="center">
+  <img src="sentinela.gif" alt="Demonstração do Sentinela AI" width="100%"/>
+</p>
+
+---
+
 ## Funcionalidades
 
 - **Coleta automática de traces** — captura input, output, latência, tokens e custo de cada chamada LLM

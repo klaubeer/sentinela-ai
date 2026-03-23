@@ -239,7 +239,7 @@ sentinela-ai/
 
 ```
 ┌─────────────┐     ┌──────────────┐     ┌──────────────────────┐
-│   Projeto   │────▶│    Trace     │────▶│  ResultadoAvaliacao  │
+│   Projeto   │────▶│    Trace    │────▶│  ResultadoAvaliacao  │
 │             │     │              │     │                      │
 │ id          │     │ id           │     │ id                   │
 │ nome        │     │ projeto_id   │     │ trace_id             │
@@ -254,7 +254,7 @@ sentinela-ai/
                     │ metadata     │     │              │
                     │ criado_em    │     │ avaliador    │
                     └──────────────┘     │ threshold    │
-                                        │ janela_min   │
+                                         │ janela_min   │
                     ┌──────────────┐     │ canal        │
                     │   Dataset    │     └──────────────┘
                     │              │

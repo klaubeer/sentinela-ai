@@ -9,11 +9,6 @@ if [ ! -f .env.prod ]; then
   exit 1
 fi
 
-# Carrega variáveis do .env.prod para o script (necessário para POSTGRES_PASSWORD no compose)
-set -a
-source .env.prod
-set +a
-
 echo ">> Atualizando código..."
 git pull origin main
 

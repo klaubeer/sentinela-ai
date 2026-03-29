@@ -3,10 +3,7 @@ services:
     image: postgres:16-alpine
     container_name: sentinela-postgres
     restart: unless-stopped
-    environment:
-      POSTGRES_USER: sentinela
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: sentinela
+    env_file: .env.prod
     volumes:
       - dados_postgres:/var/lib/postgresql/data
     healthcheck:
@@ -36,12 +33,6 @@ services:
     container_name: sentinela-servidor
     restart: unless-stopped
     env_file: .env.prod
-    environment:
-      DATABASE_URL: postgresql+asyncpg://sentinela:${POSTGRES_PASSWORD}@postgres:5432/sentinela
-      REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/1
-      AMBIENTE: producao
     depends_on:
       postgres:
         condition: service_healthy
@@ -65,11 +56,6 @@ services:
     container_name: sentinela-worker
     restart: unless-stopped
     env_file: .env.prod
-    environment:
-      DATABASE_URL: postgresql+asyncpg://sentinela:${POSTGRES_PASSWORD}@postgres:5432/sentinela
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/1
-      AMBIENTE: producao
     depends_on:
       postgres:
         condition: service_healthy
@@ -86,11 +72,6 @@ services:
     container_name: sentinela-beat
     restart: unless-stopped
     env_file: .env.prod
-    environment:
-      DATABASE_URL: postgresql+asyncpg://sentinela:${POSTGRES_PASSWORD}@postgres:5432/sentinela
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/1
-      AMBIENTE: producao
     depends_on:
       - worker
     command: celery -A app.workers.celery_app beat --loglevel=info
@@ -104,8 +85,6 @@ services:
     container_name: sentinela-dashboard
     restart: unless-stopped
     env_file: .env.prod
-    environment:
-      SERVIDOR_URL: http://servidor:8000
     depends_on:
       - servidor
     labels:

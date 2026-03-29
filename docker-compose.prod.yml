@@ -1,0 +1,129 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sentinela-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sentinela
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: sentinela
+    volumes:
+      - dados_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentinela"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rede_sentinela
+
+  redis:
+    image: redis:7-alpine
+    container_name: sentinela-redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rede_sentinela
+
+  servidor:
+    build:
+      context: ./servidor
+      dockerfile: Dockerfile
+    container_name: sentinela-servidor
+    restart: unless-stopped
+    env_file: .env.prod
+    environment:
+      DATABASE_URL: postgresql+asyncpg://sentinela:${POSTGRES_PASSWORD}@postgres:5432/sentinela
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+      AMBIENTE: producao
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sentinela-api.rule=Host(`api.sentinela.klauberfischer.online`)"
+      - "traefik.http.routers.sentinela-api.entrypoints=websecure"
+      - "traefik.http.routers.sentinela-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.sentinela-api.loadbalancer.server.port=8000"
+      - "traefik.docker.network=proxy"
+    networks:
+      - rede_sentinela
+      - proxy
+
+  worker:
+    build:
+      context: ./servidor
+      dockerfile: Dockerfile
+    container_name: sentinela-worker
+    restart: unless-stopped
+    env_file: .env.prod
+    environment:
+      DATABASE_URL: postgresql+asyncpg://sentinela:${POSTGRES_PASSWORD}@postgres:5432/sentinela
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+      AMBIENTE: producao
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: celery -A app.workers.celery_app worker --loglevel=info --concurrency=2
+    networks:
+      - rede_sentinela
+
+  beat:
+    build:
+      context: ./servidor
+      dockerfile: Dockerfile
+    container_name: sentinela-beat
+    restart: unless-stopped
+    env_file: .env.prod
+    environment:
+      DATABASE_URL: postgresql+asyncpg://sentinela:${POSTGRES_PASSWORD}@postgres:5432/sentinela
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+      AMBIENTE: producao
+    depends_on:
+      - worker
+    command: celery -A app.workers.celery_app beat --loglevel=info
+    networks:
+      - rede_sentinela
+
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    container_name: sentinela-dashboard
+    restart: unless-stopped
+    env_file: .env.prod
+    environment:
+      SERVIDOR_URL: http://servidor:8000
+    depends_on:
+      - servidor
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sentinela-dashboard.rule=Host(`sentinela.klauberfischer.online`)"
+      - "traefik.http.routers.sentinela-dashboard.entrypoints=websecure"
+      - "traefik.http.routers.sentinela-dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.services.sentinela-dashboard.loadbalancer.server.port=8501"
+      - "traefik.docker.network=proxy"
+    networks:
+      - rede_sentinela
+      - proxy
+
+networks:
+  rede_sentinela:
+    driver: bridge
+  proxy:
+    external: true
+
+volumes:
+  dados_postgres:

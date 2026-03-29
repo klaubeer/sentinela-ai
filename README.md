@@ -38,6 +38,8 @@ O Sentinela é uma plataforma open-source de **avaliação e observabilidade** p
 
 ## Demonstração
 
+Acesse: **https://sentinela.klauberfischer.online/**
+
 <p align="center">
   <img src="sentinela.gif" alt="Demonstração do Sentinela AI" width="100%"/>
 </p>

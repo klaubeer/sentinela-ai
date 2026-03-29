@@ -20,11 +20,23 @@ git pull origin main
 echo ">> Buildando imagens..."
 docker compose -f docker-compose.prod.yml build --no-cache
 
-echo ">> Aplicando migrations..."
-docker compose -f docker-compose.prod.yml run --rm servidor alembic upgrade head
-
 echo ">> Subindo serviços..."
 docker compose -f docker-compose.prod.yml up -d
+
+echo ">> Aguardando servidor inicializar..."
+timeout=60
+until docker compose -f docker-compose.prod.yml exec -T servidor echo "ok" &>/dev/null; do
+  timeout=$((timeout - 2))
+  if [ $timeout -le 0 ]; then
+    echo "ERRO: servidor não iniciou a tempo."
+    docker compose -f docker-compose.prod.yml logs servidor
+    exit 1
+  fi
+  sleep 2
+done
+
+echo ">> Aplicando migrations..."
+docker compose -f docker-compose.prod.yml exec -T servidor alembic upgrade head
 
 echo ">> Status dos containers:"
 docker compose -f docker-compose.prod.yml ps
